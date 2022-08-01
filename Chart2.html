@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>Narrative Chart by Michaela Horn</title>
+   </head>
+   <style> 
+      #barchart rect { fill: steelblue; } 
+      #tooltip {
+          opacity: 0;
+          position: absolute;
+          text-align: center;
+          width: 80px; 
+          height: 40px;
+          background: white;
+          border: 0px;
+          padding: 2px;
+          pointer-events: none; 
+      }
+      .border {
+         border: 2px blue dashed;
+      }
+
+      .mr-0 {
+         margin-right: 0;
+      }
+
+      .ml-auto {
+      margin-left:auto;
+      }
+
+      .d-block {
+         display:block;
+      }
+
+      .right_aligned {
+         text-align: right;
+      }
+
+      a {
+         text-decoration: none;
+         display: inline-block;
+         padding: 8px 16px;
+      }
+
+      a:hover {
+         background-color: #ddd;
+         color: black;
+      }
+
+      .previous {
+         background-color: #f1f1f1;
+         color: black;
+      }
+
+      .next {
+         background-color: #04AA6D;
+         color: white;
+      }
+
+      .round {
+         border-radius: 50%;
+      }
+
+      </style>
+   <body onload='init()'>
+      <div id="wrapper"></div>
+      <script src="http://d3js.org/d3.v5.min.js"></script>
+      <script src="https://d3js.org/d3-array.v2.min.js"></script>
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.3.1/d3-annotation.min.js"></script>
+         <!-- Load d3-annotation -->
+         <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+
+         <a href="index.html" target="_parent" class="previous">&laquo; Previous</a>
+         <a href="Chart3.html" target="_parent" class="next">Next &raquo;</a>
+
+         <!-- Create a button to trigger the transition -->
+         <button onclick="triggerTransition()">Click to move the car</button>
+
+         <p aligned="right"> Hover over the bar chart for specific information about the cars</p>
+
+         <!-- Create a div with just a rect in svg -->
+         <div>
+            <svg width="960px" height="200px">
+               <rect
+                  id="rectArea" x="10" y="50"
+                  width="200" height="50" stroke="black"
+                  fill="#69b3a2" stroke-width="1"/>
+         
+               <circle
+                  id="frontwheel" cx="50" cy="100" r="20" fill="red"> </circle>
+               <circle
+                  id="backwheel" cx="160" cy="100" r="20" fill="red"> </circle>
+            </svg>
+         </div>
+         <script>
+            function triggerTransition(){
+               var audio = new Audio("data/mixkit-car-double-horn-719.wav");
+               audio.play();
+               audio.currentTime=0;
+
+               d3.select("#rectArea")
+               .transition().duration(4000).delay(500)
+               .attr("x", 400)
+
+               d3.select("#frontwheel")
+                  .transition().duration(4000).delay(500)
+                  .attr('cx',50 + 400)
+         
+               d3.select("#backwheel")
+                  .transition().duration(4000).delay(500)
+                  .attr('cx',160 + 400)
+            }
+            </script>
+
+      <div id="tooltip"></div>
+
+      <svg width=750 height=550 id="barchart">
+      </svg>
+      <script type="text/javascript">
+         async function init() {
+          const data_values = await d3.csv('https://flunky.github.io/cars2017.csv');
+
+        var svg = d3.select("#barchart"),
+            margin = 200,
+            width = svg.attr("width") - margin, //500
+            height = svg.attr("height") - margin //500
+        
+        var xScale = d3.scaleBand().range ([0, width+margin]).padding(0.4);
+        var yScale = d3.scaleLinear().domain([0, 150]).range([height, 0]);
+      
+
+        var g = svg.append("g")
+            .attr("transform", "translate(" + 100 + "," + 0 + ")");
+
+        // Title
+        svg.append('text')
+        .attr('x', width/2 + 100)
+        .attr('y', 50)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 20)
+        .text('Average Highway MPG');
+        
+        // X label
+        svg.append('text')
+        .attr('x', width/2 + 100)
+        .attr('y', height + 25)
+        .attr('text-anchor', 'middle')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 12)
+        .text('Car Manufacturer');
+        
+        // Y label
+        svg.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('transform', 'translate(50,' + (height - 200) + ')rotate(-90)')
+        .style('font-family', 'Helvetica')
+        .style('font-size', 12)
+        .text('Miles Per Gallon');
+
+        g.append("g")
+         .attr("transform", "translate(0," + (height) + ")")
+         .call(d3.axisBottom(xScale));
+        
+        g.append("g")
+         .call(d3.axisLeft(yScale));
+      
+        var tooltip = d3.select("#tooltip");
+
+        svg.append('g')
+           .selectAll("rect")
+           .data(data_values)
+           .enter()
+           .append("rect")
+           .attr("width","25px")
+            .attr('x', function(d,i){ return ((i*30) + 100); })
+           .attr("height", 20)
+           .attr("y", 330)
+           .on("mouseover", function(d) {
+                  tooltip.style("opacity", 1)
+                     .style("left", (d3.event.pageX)+"px")
+                     .style("top", (d3.event.pageY)+"px")
+                     .html(d.Make +" MPG: "+ d.AverageHighwayMPG + " Fuel-Type: " + d.Fuel);
+                })
+           .on("mouseout", function() { tooltip.style("opacity", 0) })    
+           .transition().duration(3000).delay(1000)
+           .attr("height", function(d){ return height - yScale(d.AverageHighwayMPG); })
+           .attr('y', function(d){ return yScale(d.AverageHighwayMPG); }) // This flips the chart because 0,0 is the top left hand corner 
+           .style("fill", function(d) {
+               if ( d.AverageHighwayMPG == 19) 
+                     {return "gold"}
+               else if(d.Fuel == "Electricity")
+                     { return "green"}
+               else 	{ return "steelblue" }
+               ;})
+         }
+        </script>
+
+
+         <script>
+            // ==== Aston Martin====== //
+            const annotationsAston = [
+            {
+               note: {
+                  label: "Fuel type: Gasoline. 19 MPG",
+                  align:"left",
+                  title: "Aston Martin"
+               },
+               connector: {
+                  end: "arrow",        // none, or arrow or dot
+                  type: "line",       // Line or curve
+                  points: 3,           // Number of break in the curve
+                  lineType : "horizontal"
+               },
+               color: ["purple"],
+               x: 230,
+               y: 300,
+               dy: -70,
+               dx: -70
+            }
+            ]
+
+            // Add annotation to the chart
+            const makeAnnotationsAston = d3.annotation()
+            .annotations(annotationsAston)
+            d3.select("#barchart")
+            .append("g")
+            .call(makeAnnotationsAston)
+
+            // ==== BMW====== //
+            const annotationsBMW = [
+            {
+               note: {
+                  label: "Fuel type: Electricity, 109 MPG",
+                  title: "BMW"
+               },
+               connector: {
+                  end: "arrow",        // none, or arrow or dot
+                  type: "line",       // Line or curve
+                  points: 3,           // Number of break in the curve
+                  lineType : "horizontal"
+               },
+               color: ["purple"],
+               x: 550,
+               y: 120,
+               dy: 70,
+               dx: 70
+            }
+            ]
+            
+            // Add annotation to the chart
+            const makeAnnotationsBMW = d3.annotation()
+            .annotations(annotationsBMW)
+            d3.select("#barchart")
+            .append("g")
+            .call(makeAnnotationsBMW)
+            
+            
+            // ==== CHANGE STYLE ATTRIBUTE ====== //
+            d3.select("#barchart").selectAll(".connector")
+            .attr('stroke', "blue")
+            .style("stroke-dasharray", ("3, 3"))
+            d3.select("#barchart").selectAll(".connector-end")
+            .attr('stroke', "blue")
+            .attr('fill', "blue")
+
+            </script>
+   </body>
+</html>
