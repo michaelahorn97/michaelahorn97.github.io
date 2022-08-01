@@ -3,6 +3,12 @@
    <head>
       <title>Narrative Chart by Michaela Horn</title>
    </head>
+   <a href="/index.html" target="_parent" class="previous">&laquo; Previous</a>
+   <a href="/Chart3.html" target="_parent" class="next">Next &raquo;</a>
+   
+   <script src="https://d3js.org/d3.v5.min.js"></script>
+   <!-- Load d3-annotation -->
+  <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
    <style> 
       #barchart rect { fill: steelblue; } 
       #tooltip {
@@ -62,16 +68,9 @@
       }
 
       </style>
+
    <body onload='init()'>
       <div id="wrapper"></div>
-      <script src="http://d3js.org/d3.v5.min.js"></script>
-      <script src="https://d3js.org/d3-array.v2.min.js"></script>
-         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-annotation/2.3.1/d3-annotation.min.js"></script>
-         <!-- Load d3-annotation -->
-         <script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
-
-         <a href="index.html" target="_parent" class="previous">&laquo; Previous</a>
-         <a href="Chart3.html" target="_parent" class="next">Next &raquo;</a>
 
          <!-- Create a button to trigger the transition -->
          <button onclick="triggerTransition()">Click to move the car</button>
@@ -94,9 +93,9 @@
          </div>
          <script>
             function triggerTransition(){
-               var audio = new Audio("data/mixkit-car-double-horn-719.wav");
-               audio.play();
-               audio.currentTime=0;
+                var audio = new Audio("/data/mixkit-car-double-horn-719.wav");
+                audio.play();
+                audio.currentTime=0;
 
                d3.select("#rectArea")
                .transition().duration(4000).delay(500)
@@ -118,7 +117,7 @@
       </svg>
       <script type="text/javascript">
          async function init() {
-          const data_values = await d3.csv('https://flunky.github.io/cars2017.csv');
+          const data_values = await d3.csv('https://raw.githubusercontent.com/michaelahorn97/michaelahorn97.github.io/main/data/cars2017.csv');
 
         var svg = d3.select("#barchart"),
             margin = 200,
